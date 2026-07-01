@@ -40,8 +40,9 @@ def on_click(index):
                           fg="#4d0026" if current_player == "X" else "#800040")
     winner = check_winner(board)
     if winner:
+        update_score(winner)
         messagebox.showinfo("🎉 We have a winner!",
-                            f"Player {winner} wins! 🏆")
+                            f"{player_names[winner]} wins! 🏆")
         reset_game()
         return
     if is_draw(board):
@@ -61,6 +62,48 @@ def reset_game():
     turn_label.config(text=f"Player {current_player}'s Turn")
 
 # ─── BUILD THE WINDOW (Member A's main job) ───
+# ─── SCORE TRACKING (Member B) ───
+scores = {"X": 0, "O": 0}
+score_label = None
+player_names = {"X": "Player X", "O": "Player O"}
+
+def update_score(winner):
+    scores[winner] += 1
+    score_label.config(text=f"🏆 {player_names['X']}: {scores['X']}  |  {player_names['O']}: {scores['O']}")
+
+# ─── NAME INPUT SCREEN (Member B) ───
+def get_player_names():
+    name_window = tk.Tk()
+    name_window.title("Enter Player Names")
+    name_window.configure(bg=BG)
+    name_window.resizable(False, False)
+
+    tk.Label(name_window, text="🎀 Welcome to Tic Tac Toe 🎀",
+             font=FONT_LABEL, bg=BG, fg=TEXT_COLOR).pack(pady=10)
+
+    tk.Label(name_window, text="Player X Name:",
+             font=FONT_LABEL, bg=BG, fg=TEXT_COLOR).pack(pady=5)
+    x_entry = tk.Entry(name_window, font=FONT_LABEL)
+    x_entry.pack(pady=5)
+
+    tk.Label(name_window, text="Player O Name:",
+             font=FONT_LABEL, bg=BG, fg=TEXT_COLOR).pack(pady=5)
+    o_entry = tk.Entry(name_window, font=FONT_LABEL)
+    o_entry.pack(pady=5)
+
+    def confirm():
+        x_name = x_entry.get().strip() or "Player X"
+        o_name = o_entry.get().strip() or "Player O"
+        player_names["X"] = x_name
+        player_names["O"] = o_name
+        name_window.destroy()
+
+    tk.Button(name_window, text="Start Game 🎮",
+              font=FONT_LABEL, bg=BTN_COLOR, fg=TEXT_COLOR,
+              activebackground=BTN_HOVER,
+              command=confirm).pack(pady=15)
+
+    name_window.mainloop()
 def build_window():
     global turn_label
 
@@ -76,9 +119,15 @@ def build_window():
     title.pack(pady=10)
 
     # Turn label
-    turn_label = tk.Label(root, text="Player X's Turn",
+   turn_label = tk.Label(root, text=f"{player_names['X']}'s Turn",
                           font=FONT_LABEL, bg=BG, fg=TEXT_COLOR)
     turn_label.pack(pady=5)
+# Score tracker
+    global score_label
+    score_label = tk.Label(root,
+                           text=f"🏆 {player_names['X']}: 0  |  {player_names['O']}: 0",
+                           font=FONT_LABEL, bg=BG, fg=TEXT_COLOR)
+    score_label.pack(pady=5)
 
     # Game board frame
     frame = tk.Frame(root, bg=BG)
@@ -112,4 +161,5 @@ def build_window():
     root.mainloop()
 
 # ─── RUN ───
+get_player_names()
 build_window()
